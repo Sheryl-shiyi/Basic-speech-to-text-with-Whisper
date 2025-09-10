@@ -1,0 +1,81 @@
+apiVersion: kubeflow.org/v1
+kind: Notebook
+metadata:
+  name: {{ .Values.workbench.name }}
+  namespace: {{ .Values.namespaces.serving }}
+  annotations:
+    notebooks.opendatahub.io/inject-oauth: "true"
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ .Values.workbench.name }}
+      enableServiceLinks: false
+      containers:
+        - name: {{ .Values.workbench.name }}
+          image: {{ .Values.workbench.image | quote }}
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: {{ .Values.workbench.cpu.requests | quote }}
+              memory: {{ .Values.workbench.memory.requests | quote }}
+            limits:
+              cpu: {{ .Values.workbench.cpu.limits | quote }}
+              memory: {{ .Values.workbench.memory.limits | quote }}
+          env:
+            - name: NOTEBOOK_ARGS
+              value: |-
+                --ServerApp.port=8888
+                --ServerApp.token=''
+                --ServerApp.password=''
+                --ServerApp.base_url=/notebook/{{ .Values.namespaces.serving }}/{{ .Values.workbench.name }}
+                --ServerApp.quit_button=False
+          ports:
+            - name: notebook-port
+              containerPort: 8888
+          volumeMounts:
+            - name: {{ .Values.workbench.pvc.name }}
+              mountPath: /opt/app-root/src/
+            - name: shm
+              mountPath: /dev/shm
+          {{- if and .Values.workbench.envSecret (ne .Values.workbench.envSecret "") }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.workbench.envSecret }}
+          {{- end }}
+        - name: oauth-proxy
+          image: registry.redhat.io/openshift4/ose-oauth-proxy
+          imagePullPolicy: Always
+          args:
+            - "--provider=openshift"
+            - "--https-address=:8443"
+            - "--http-address="
+            - "--openshift-service-account={{ .Values.workbench.name }}"
+            - "--upstream=http://localhost:8888"
+            - "--email-domain=*"
+            - "--skip-provider-button"
+            - "--client-id={{ .Values.workbench.name }}-{{ .Values.namespaces.serving }}-oauth-client"
+            - "--client-secret-file=/etc/oauth/client/secret"
+            - "--tls-cert=/etc/tls/private/tls.crt"
+            - "--tls-key=/etc/tls/private/tls.key"
+          ports:
+            - name: oauth-proxy
+              containerPort: 8443
+          volumeMounts:
+            - name: oauth-client
+              mountPath: /etc/oauth/client
+            - name: oauth-config
+              mountPath: /etc/oauth/config
+            - name: tls-certificates
+              mountPath: /etc/tls/private
+      volumes:
+        - name: {{ .Values.workbench.pvc.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.workbench.pvc.name }}
+        - name: shm
+          emptyDir: { medium: Memory }
+        - name: oauth-config
+          secret: { secretName: whisper-workbench-oauth-config }
+        - name: oauth-client
+          secret: { secretName: whisper-workbench-oauth-client }
+        - name: tls-certificates
+          secret: { secretName: whisper-workbench-tls }

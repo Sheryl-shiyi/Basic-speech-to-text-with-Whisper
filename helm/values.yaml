@@ -1,0 +1,51 @@
+# Target namespaces
+namespaces:
+  serving: "whisper-proj"
+
+image:
+  repository: quay.io/vllm/vllm-cuda
+  tag: "0.9.2.2"
+  pullPolicy: IfNotPresent
+
+model:
+  name: "whisper-large-v3"
+  storageUri: "oci://quay.io/redhat-ai-services/modelcar-catalog:whisper-large-v3"
+  connectionSecretName: "whisper-large-v3-oci"
+
+resources:
+  requests:
+    cpu: "4"
+    memory: "8Gi"
+    nvidia.com/gpu: "1"
+  limits:
+    cpu: "8"
+    memory: "10Gi"
+    nvidia.com/gpu: "1"
+
+replicas:
+  min: 1
+  max: 1
+
+tolerations:
+  - key: "nvidia.com/gpu"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+# Optional OpenShift route; leave host unset for automatic assignment
+route: {}
+
+workbench:
+  name: "whisper-workbench"
+  image: "image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2025.1"
+  cpu:
+    requests: "3"
+    limits: "6"
+  memory:
+    requests: "24Gi"
+    limits: "24Gi"
+  pvc:
+    name: "whisper-workbench-storage"
+    size: "20Gi"
+    storageClassName: "gp3-csi"
+  gitRepo:
+    url: "https://github.com/Sheryl-shiyi/Basic-speech-to-text-with-Whisper.git"

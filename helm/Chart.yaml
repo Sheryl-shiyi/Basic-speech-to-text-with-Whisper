@@ -1,0 +1,6 @@
+apiVersion: v2
+name: whisper-oseai
+description: A quick start guide to deploy Whisper on OpenShift AI and enable speech-to-text inference in your cluster
+type: application
+version: 1.0.0
+appVersion: "whisper-large-v3"

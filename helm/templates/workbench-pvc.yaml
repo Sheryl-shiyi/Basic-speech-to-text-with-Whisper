@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.workbench.pvc.name }}
+  namespace: {{ .Values.namespaces.serving }}
+  annotations:
+    openshift.io/display-name: {{ printf "%s-storage" .Values.workbench.name | quote }}
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: {{ .Values.workbench.pvc.size | quote }}
+  {{- if .Values.workbench.pvc.storageClassName }}
+  storageClassName: {{ .Values.workbench.pvc.storageClassName | quote }}
+  {{- end }}
+  volumeMode: Filesystem

@@ -1,0 +1,11 @@
+Install:
+  helm install whisper ./ --namespace {{ .Values.namespaces.serving }} --create-namespace
+
+Configure:
+  - namespaces.serving
+  - model.storageUri, model.connectionSecretName
+  - resources.*, replicas.*
+  - workbench.pvc.*, workbench.gitRepo.url
+
+Note:
+  - Cluster ServingRuntime is deployed in 'redhat-ods-applications' (hard-coded).
