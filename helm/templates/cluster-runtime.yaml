@@ -9,7 +9,7 @@ metadata:
     openshift.io/display-name: "vLLM 0.9.2.2 NVIDIA GPU ServingRuntime for KServe"
     opendatahub.io/runtime-version: v0.9.2.2
     opendatahub.io/apiProtocol: REST
-    opendatahub.io/recommended-accelerators: "[\"nvidia.com/gpu\"]"
+    opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
 spec:
   annotations:
     prometheus.io/path: /metrics
@@ -22,7 +22,7 @@ spec:
       args:
         - "--port=8080"
         - "--model=/mnt/models"
-        - "--served-model-name={{'{{'}}.Name{{'}}'}}"
+        - "--served-model-name={{.Name}}"
       env:
         - name: HF_HOME
           value: /tmp/hf_home

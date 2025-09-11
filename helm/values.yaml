@@ -16,11 +16,11 @@ resources:
   requests:
     cpu: "4"
     memory: "8Gi"
-    nvidia.com/gpu: "1"
+    gpu: "1"
   limits:
     cpu: "8"
     memory: "10Gi"
-    nvidia.com/gpu: "1"
+    gpu: "1"
 
 replicas:
   min: 1

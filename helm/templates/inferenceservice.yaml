@@ -19,8 +19,8 @@ spec:
         requests:
           cpu: {{ .Values.resources.requests.cpu | quote }}
           memory: {{ .Values.resources.requests.memory | quote }}
-          nvidia.com/gpu: {{ .Values.resources.requests["nvidia.com/gpu"] | quote }}
+          nvidia.com/gpu: {{ .Values.resources.requests.gpu | quote }}
         limits:
           cpu: {{ .Values.resources.limits.cpu | quote }}
           memory: {{ .Values.resources.limits.memory | quote }}
-          nvidia.com/gpu: {{ .Values.resources.limits["nvidia.com/gpu"] | quote }}
+          nvidia.com/gpu: {{ .Values.resources.limits.gpu | quote }}
