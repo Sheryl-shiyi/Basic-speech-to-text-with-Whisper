@@ -1,6 +1,5 @@
 # Target namespaces
-namespaces:
-  serving: "whisper-proj"
+namespaces: "whisper-proj"
 
 image:
   repository: quay.io/vllm/vllm-cuda
@@ -37,12 +36,13 @@ route: {}
 workbench:
   name: "whisper-workbench"
   image: "image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2025.1"
-  cpu:
-    requests: "3"
-    limits: "6"
-  memory:
-    requests: "24Gi"
-    limits: "24Gi"
+  resources:
+    requests:
+      cpu: "3"
+      memory: 24Gi
+    limits:
+      cpu: "6"
+      memory: 24Gi
   pvc:
     name: "whisper-workbench-storage"
     size: "20Gi"

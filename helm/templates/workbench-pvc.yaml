@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .Values.workbench.pvc.name }}
-  namespace: {{ .Values.namespaces.serving }}
+  namespace: {{ .Values.namespaces }}
   annotations:
     openshift.io/display-name: {{ printf "%s-storage" .Values.workbench.name | quote }}
 spec:

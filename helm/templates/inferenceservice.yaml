@@ -2,7 +2,7 @@ apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
   name: {{ .Values.model.name }}
-  namespace: {{ .Values.namespaces.serving }}
+  namespace: {{ .Values.namespaces }}
   annotations:
     serving.kserve.io/deploymentMode: RawDeployment
 spec:

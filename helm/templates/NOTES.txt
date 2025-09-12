@@ -1,5 +1,5 @@
 Install:
-  helm install whisper ./ --namespace {{ .Values.namespaces.serving }} --create-namespace
+  helm install whisper ./ --namespace {{ .Values.namespaces }} --create-namespace
 
 Configure:
   - namespaces.serving

@@ -2,12 +2,10 @@ apiVersion: serving.kserve.io/v1alpha1
 kind: ServingRuntime
 metadata:
   name: {{ .Values.model.name }}
-  namespace: {{ .Values.namespaces.serving }}
+  namespace: {{ .Values.namespaces }}
   labels:
     opendatahub.io/dashboard: "true"
   annotations:
-    opendatahub.io/template-name: vllm-cuda-runtime-0922
-    opendatahub.io/serving-runtime-scope: global
     opendatahub.io/runtime-version: v0.9.2.2
     opendatahub.io/accelerator-name: "nvidia"
     openshift.io/display-name: {{ .Values.model.name | quote }}
