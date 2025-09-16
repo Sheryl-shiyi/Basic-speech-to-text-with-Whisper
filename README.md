@@ -1,70 +1,177 @@
-# [work in progress!]
+# Whisper Quickstart on OpenShift AI
 
-# [INSERT quickstart name here]
-
-*Section is required. NOTE: any italicized or bracketed text should be deleted
-or replaced.*  
-
-*Replace title & this section with a high-level description
-of your quickstart.* 
-
-*Think of it as your elevator pitch. What is the quickstart? What does it do? Why
-should I bother deploying it?*
-
-*Need an example README? Look at:
-[vllm-cpu](https://github.com/rh-ai-quickstart/llm-cpu-serving)*
-
-*OR, [vLLM Tool Calling](https://github.com/rh-ai-quickstart/vllm-tool-calling)*
-
-*Lastly, include a link to the installation section so the user can start quickly.*
-
-*For example:* 
+Welcome to the whisper quickstart on OpenShift AI! This project helps you quickly set up the required components on Red Hat OpenShift AI and begin transcribing audio with minimal configuration.
 
 To see how it's done, jump straight to [installation](#install). 
 
-## Table of contents
 
-*Table of contents is optional, but recommended*
+# Whisper Quickstart on OpenShift AI
 
-## Detailed description
-*This section is required. This is your chance to describe the AI quickstart.*
+This repository provides a Helm chart and supporting resources for a quick start with **speech-to-text transcription using Whisper** on **Red Hat OpenShift AI**.  
+The deployment provisions all required components, including:
 
-### See it in action 
+- A **Workbench** in OpenShift AI with preloaded example notebooks.  
+- A deployed **Whisper-large-v3 model** served through a GPU-enabled runtime (`vLLM 0.9.2.2`).  
+- Pre-cloned quickstart repository with data samples and example workflows.  
 
-*This section is optional but recommended*
+With this setup, users can start experimenting with **automatic audio transcription** using either:  
+1. **Direct HTTP requests** to the deployed model.  
+2. **The OpenAI Python client** interface.  
 
-### Architecture diagrams
+---
 
-*Section is required. Put images in `assets/images` folder* 
+## Architecture Overview
 
-### References 
+The following diagram illustrates the components deployed by this Helm chart:
+<p align="center">
+  <img src="./assets/images/architecture-img.png" alt="Architecture" width="380"/>
+</p>
 
-*Section required. Include links to supporting information, documentation, or
-learning materials.*
+- **Workbench**: Hosts Jupyter notebooks with example workflows and preloaded data samples.  
+- **Whisper-large-v3 model**: Deployed through a GPU ServingRuntime (vLLM 0.9.2.2).  
+- **Two alternatives to trigger transcription request**:  
+  - **Option 1**: Send audio files via HTTP request.  
+  - **Option 2**: Use the OpenAI Python client.  
 
-## Requirements
+---
 
-*Section required* 
+## Requirements 
+
+### Recommended hardware requirements 
+
+- GPU required : +24GiB vRAM
+- CPU cores: 16 cores   
+- Memory: 64Gi+ RAM 
+- Storage: 15Gi
 
 ### Minimum hardware requirements 
 
-*Section is required* 
+- GPU required : 1 x NVIDIA GPU with 24GiB vRAM
+- CPU cores: 8+ cores 
+- Memory: 32Gi+ RAM 
+- Storage: 10Gi 
 
-### Required software 
+### Required software  
 
-*Section is required. What software dependencies do they need?* 
+- Red Hat OpenShift Container Platform
+- Red Hat OpenShift AI
+    - KServe needs to be enabled
+- Red Hat OpenShift Serverless
+- Red Hat OpenShift Service Mesh 2
+- Red Hat - Authorino Operator 
+- Nvidia GPU Operator 
+- Node Feature Discovery Operator 
 
 ### Required permissions
 
-*Section is required. Describe the permissions the user will need. Cluster
-admin? Regular user?*
+- Cluster admin permissions are required
+---
 
 ## Install
 
-*Section is required. Include the explicit steps needed to deploy your
-quickstart. If screenshots are included, remember to put them in the
-`assets/images` folder.*
+**Please note before you start**
 
-## Uninstall 
+This example was tested on Red Hat OpenShift 4.19.9 & Red Hat OpenShift AI 2.22.1.  
 
-*Section required. Include explicit steps to cleanup quickstart.*
+### Clone the repository
+
+```
+git clone https://github.com/Sheryl-shiyi/Basic-speech-to-text-with-Whisper && cd Basic-speech-to-text-with-Whisper/
+```
+
+### Install with Helm
+Deploy the Whisper Quickstart resources using Helm:
+
+```bash
+helm install whisper-quickstart whisper-quickstart-1.0.0.tgz \
+  --namespace whisper-quickstart --create-namespace \
+  --set namespaces="whisper-quickstart" \
+  --set model.name="whisper-large-v3" \
+  --set model.storageUri="oci://quay.io/redhat-ai-services/modelcar-catalog:whisper-large-v3"
+```
+
+This command will:  
+- Create a namespace `whisper-quickstart`.  
+- Deploy the **Workbench** and preconfigured **Whisper-large-v3 model**.  
+- Clone the quickstart repository into the Workbench environment.  
+
+---
+
+## Verifying the Deployment
+
+After installation, verify that the resources are running:
+
+```bash
+oc get all -n whisper-quickstart
+```
+
+Ensure that the following are present and ready:  
+- **Deployment**: `whisper-large-v3-predictor`  
+- **StatefulSet**: `whisper-workbench`  
+- **Services**: including the predictor and Workbench endpoints  
+
+![oc-get-all](./assets/images/oc-get-all.png)
+
+---
+
+## Accessing the Workbench
+
+1. Log in to the **OpenShift AI dashboard**.  
+2. Locate the **Workbench** named `whisper-workbench` under the `whisper-quickstart` data science project.  
+3. Open the Workbench — the quickstart repository will already be cloned.  
+4. Inside, you will find two example notebooks to start transcribing audio.  
+
+![workbench](./assets/images/workbench.png)
+![notebook-page](./assets/images/notebook-page.png)
+
+---
+
+## Finding the Model Endpoint
+
+The deployed Whisper model can be accessed within the cluster.  
+There are two ways to find the service endpoint:
+
+### Option 1: Using the OpenShift Web Console
+- Navigate to **Networking → Services → whisper-large-v3-predictor**.  
+- Under **Service routing**, copy the **Hostname** (e.g., `whisper-large-v3-predictor.whisper-quickstart.svc.cluster.local`).  
+
+![Service-Routing](./assets/images/serving-route.png)
+
+### Option 2: Using the `oc` CLI
+```bash
+oc get svc whisper-large-v3-predictor -n whisper-quickstart \
+  -o jsonpath='"http://{.metadata.name}.{.metadata.namespace}.svc.cluster.local:{.spec.ports[?(@.name=="http")].targetPort}{"\n"}"'
+```
+
+This will return a URL similar to:
+
+```
+http://whisper-large-v3-predictor.whisper-quickstart.svc.cluster.local:8080
+```
+![oc-get-svc](./assets/images/oc-get-svc.png)
+---
+
+## Running Transcription Examples
+
+From the Workbench, open one of the provided notebooks:
+
+- **HTTP request**: Demonstrates sending local audio files to the deployed service endpoint.  
+- **OpenAI client**: Demonstrates using the OpenAI Python client library for transcription.  
+
+Note: Both notebooks are preconfigured with demo endpoints — please update them before you run the cells.  
+
+![example-transcribe](./assets/images/example-transcribe.png)
+
+---
+
+## Cleanup
+
+To uninstall all deployed resources:
+
+```bash
+helm uninstall whisper-quickstart -n whisper-quickstart
+oc delete namespace whisper-quickstart
+```
+
+---
+
