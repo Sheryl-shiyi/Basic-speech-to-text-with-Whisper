@@ -76,7 +76,7 @@ This example was tested on Red Hat OpenShift 4.19.9 & Red Hat OpenShift AI 2.22.
 ### Clone the repository
 
 ```
-git clone https://github.com/Sheryl-shiyi/Basic-speech-to-text-with-Whisper && cd Basic-speech-to-text-with-Whisper/
+git clone https://github.com/rh-ai-quickstart/basic-speech-to-text-with-whisper.git && cd basic-speech-to-text-with-whisper/
 ```
 
 ### Install with Helm
